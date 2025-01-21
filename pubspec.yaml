@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 0.1.0
 
 environment:
-  sdk: ^3.4.1
+  sdk: ^3.5.3
 
 dependencies:
   flutter:
@@ -12,6 +12,9 @@ dependencies:
   async_wallpaper: ^2.1.0
   path_provider: ^2.1.5
   video_player: ^2.9.2
+  lottie: ^3.1.0
+  flutter_screenutil: ^5.9.3
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
@@ -24,3 +27,5 @@ flutter:
     - assets/video1.mp4
     - assets/video2.mp4
     - assets/video3.mp4
+    - assets/images/
+    - assets/lottie/
