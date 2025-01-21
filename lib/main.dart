@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:live_wallpaper/views/pages/my_app.dart';
+import 'package:live_wallpaper/my_app.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

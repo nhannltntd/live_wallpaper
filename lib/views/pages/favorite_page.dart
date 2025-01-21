@@ -1,69 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:live_wallpaper/views/pages/video_list_screen.dart';
 import 'package:live_wallpaper/services/favorite_service.dart';
-
-class MyAppScreen extends StatefulWidget {
-  const MyAppScreen({super.key});
-
-  @override
-  State<MyAppScreen> createState() => _MyAppScreenState();
-}
-
-class _MyAppScreenState extends State<MyAppScreen> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _pages = [
-    const VideoListScreen(),
-    const FavoritePage(),
-    const SettingsPage(),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.purple.shade200,
-              Colors.blue.shade200,
-            ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-        ),
-        child: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: (index) {
-            setState(() {
-              _selectedIndex = index;
-            });
-          },
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          type: BottomNavigationBarType.fixed,
-          selectedItemColor: Colors.black,
-          unselectedItemColor: Colors.black54,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite),
-              label: 'Favorite',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Setting',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+import 'package:live_wallpaper/views/pages/video_list_page.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({super.key});
@@ -129,14 +66,5 @@ class _FavoritePageState extends State<FavoritePage> {
               },
             ),
     );
-  }
-}
-
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Settings Page'));
   }
 }
