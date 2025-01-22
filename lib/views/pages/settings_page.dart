@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -104,7 +105,9 @@ class SettingsPage extends StatelessWidget {
             ),
             title: const Text('Share'),
             onTap: () {
-              // Handle share
+              Share.share(
+                'You must try it\nhttps://play.google.com/store/apps/details?id=com.sillysmileswallpapers.funkywallpaper.evileyeswallpaper.funkysmiles',
+              );
             },
           ),
         ],
