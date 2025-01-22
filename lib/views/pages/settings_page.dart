@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'policy_page.dart';
+import '../../views/widgets/rating_dialog.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -63,7 +65,10 @@ class SettingsPage extends StatelessWidget {
             ),
             title: const Text('Rate Us'),
             onTap: () {
-              // Handle rate us
+              showDialog(
+                context: context,
+                builder: (context) => const RatingDialog(),
+              );
             },
           ),
           ListTile(
@@ -77,7 +82,10 @@ class SettingsPage extends StatelessWidget {
             ),
             title: const Text('Privacy Policy'),
             onTap: () {
-              // Handle privacy policy
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const PolicyPage()),
+              );
             },
           ),
           ListTile(
