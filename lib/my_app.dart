@@ -14,7 +14,7 @@ class _MyAppScreenState extends State<MyAppScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    const VideoListScreen(),
+    const VideoListPage(),
     const FavoritePage(),
     const SettingsPage(),
   ];

@@ -6,14 +6,14 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:live_wallpaper/services/favorite_service.dart';
 
-class VideoListScreen extends StatefulWidget {
-  const VideoListScreen({super.key});
+class VideoListPage extends StatefulWidget {
+  const VideoListPage({super.key});
 
   @override
-  State<VideoListScreen> createState() => _VideoListScreenState();
+  State<VideoListPage> createState() => _VideoListPageState();
 }
 
-class _VideoListScreenState extends State<VideoListScreen> {
+class _VideoListPageState extends State<VideoListPage> {
   final List<String> videoAssets = [
     'assets/video1.mp4',
     'assets/video2.mp4',
