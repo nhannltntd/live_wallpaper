@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:live_wallpaper/services/favorite_service.dart';
 import 'package:live_wallpaper/models/category.dart';
 import 'package:live_wallpaper/views/widgets/category_item.dart';
+import 'package:live_wallpaper/services/recent_video_service.dart';
 
 class VideoListPage extends StatefulWidget {
   const VideoListPage({super.key});
@@ -15,7 +16,33 @@ class VideoListPage extends StatefulWidget {
   State<VideoListPage> createState() => _VideoListPageState();
 }
 
-class _VideoListPageState extends State<VideoListPage> {
+class _VideoListPageState extends State<VideoListPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  Category? _selectedCategory;
+  List<String> _recentVideos = [];
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _selectedCategory =
+        categories.firstWhere((cat) => cat.name == 'Silly Smile');
+    _loadRecentVideos();
+  }
+
+  Future<void> _loadRecentVideos() async {
+    setState(() => _isLoading = true);
+    final recentVideos = await RecentVideoService.getRecentVideos();
+    if (mounted) {
+      setState(() {
+        _recentVideos = recentVideos.map((v) => v.assetPath).toList();
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,13 +63,64 @@ class _VideoListPageState extends State<VideoListPage> {
             ),
             _buildCategorySection(),
             const SizedBox(height: 16),
+            Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  color: Theme.of(context).primaryColor,
+                ),
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.grey,
+                tabs: const [
+                  Tab(text: 'Silly Smile'),
+                  Tab(text: 'New'),
+                  Tab(text: 'Recent'),
+                ],
+                onTap: (index) {
+                  setState(() {
+                    if (index == 0) {
+                      _selectedCategory = categories
+                          .firstWhere((cat) => cat.name == 'Silly Smile');
+                    } else if (index == 1) {
+                      _selectedCategory =
+                          categories.firstWhere((cat) => cat.name == 'New');
+                    }
+                  });
+                  if (index == 2) {
+                    _loadRecentVideos();
+                  }
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
             Expanded(
-              child: _buildVideoGrid(categories[0].videoAssets),
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildVideoGrid(_selectedCategory?.videoAssets ?? []),
+                  _buildVideoGrid(_selectedCategory?.videoAssets ?? []),
+                  _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : _buildVideoGrid(_recentVideos),
+                ],
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   Widget _buildCategorySection() {
@@ -305,6 +383,8 @@ class _ViewWallpaperState extends State<ViewWallpaper> {
           message: errorText,
         );
       }
+
+      await RecentVideoService.addRecentVideo(widget.assetPath);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

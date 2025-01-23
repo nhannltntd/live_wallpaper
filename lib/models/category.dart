@@ -40,4 +40,13 @@ final List<Category> categories = [
       'assets/video11.mp4',
     ],
   ),
+  const Category(
+    name: 'New',
+    iconAsset: 'assets/images/ca3.png',
+    videoAssets: [
+      'assets/video5.mp4',
+      'assets/video6.mp4',
+      'assets/video7.mp4',
+    ],
+  ),
 ];
