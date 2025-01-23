@@ -5,6 +5,8 @@ import 'package:async_wallpaper/async_wallpaper.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:live_wallpaper/services/favorite_service.dart';
+import 'package:live_wallpaper/models/category.dart';
+import 'package:live_wallpaper/views/widgets/category_item.dart';
 
 class VideoListPage extends StatefulWidget {
   const VideoListPage({super.key});
@@ -14,36 +16,123 @@ class VideoListPage extends StatefulWidget {
 }
 
 class _VideoListPageState extends State<VideoListPage> {
-  final List<String> videoAssets = [
-    'assets/video1.mp4',
-    'assets/video2.mp4',
-    'assets/video3.mp4',
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Chọn Video'),
       ),
-      body: GridView.builder(
+      body: Padding(
         padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Category",
+              style: TextStyle(
+                  fontSize: 24,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.bold),
+            ),
+            _buildCategorySection(),
+            const SizedBox(height: 16),
+            Expanded(
+              child: _buildVideoGrid(categories[0].videoAssets),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategorySection() {
+    return SizedBox(
+      height: 100,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: categories.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 16),
+        itemBuilder: (context, index) {
+          return SizedBox(
+            width: 100,
+            child: CategoryItem(
+              category: categories[index],
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CategoryVideoPage(
+                      category: categories[index],
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildVideoGrid(List<String> videos) {
+    return GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 9 / 16,
+      ),
+      itemCount: videos.length,
+      itemBuilder: (context, index) {
+        return VideoPreviewCard(
+          assetPath: videos[index],
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ViewWallpaper(
+                  assetPath: videos[index],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class CategoryVideoPage extends StatelessWidget {
+  final Category category;
+
+  const CategoryVideoPage({
+    super.key,
+    required this.category,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(category.name),
+      ),
+      body: GridView.builder(
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
           childAspectRatio: 9 / 16,
         ),
-        itemCount: videoAssets.length,
+        itemCount: category.videoAssets.length,
         itemBuilder: (context, index) {
           return VideoPreviewCard(
-            assetPath: videoAssets[index],
+            assetPath: category.videoAssets[index],
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => ViewWallpaper(
-                    assetPath: videoAssets[index],
+                    assetPath: category.videoAssets[index],
                   ),
                 ),
               );
@@ -254,37 +343,34 @@ class _ViewWallpaperState extends State<ViewWallpaper> {
             bottom: 10,
             left: 0,
             right: 0,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  fixedSize: WidgetStateProperty.all(
-                    Size(MediaQuery.of(context).size.width, buttonHeight),
-                  ),
-                  backgroundColor: WidgetStateProperty.all(
-                    Colors.black.withOpacity(0.8),
-                  ),
-                  shape: WidgetStateProperty.all(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
+            child: ElevatedButton(
+              style: ButtonStyle(
+                fixedSize: WidgetStateProperty.all(
+                  Size(MediaQuery.of(context).size.width, buttonHeight),
+                ),
+                backgroundColor: WidgetStateProperty.all(
+                  Colors.black.withOpacity(0.8),
+                ),
+                shape: WidgetStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
-                onPressed: setWallpaper,
-                child: _loading
-                    ? const SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(color: Colors.white),
-                      )
-                    : const Text(
-                        setWallpaperText,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
               ),
+              onPressed: setWallpaper,
+              child: _loading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(color: Colors.white),
+                    )
+                  : const Text(
+                      setWallpaperText,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
             ),
           ),
         ],
