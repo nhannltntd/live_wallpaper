@@ -4,10 +4,13 @@ import 'package:video_player/video_player.dart';
 import 'package:async_wallpaper/async_wallpaper.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:live_wallpaper/services/favorite_service.dart';
 import 'package:live_wallpaper/models/category.dart';
 import 'package:live_wallpaper/views/widgets/category_item.dart';
-import 'package:live_wallpaper/services/recent_video_service.dart';
+import 'package:live_wallpaper/blocs/recent_videos/recent_videos_bloc.dart';
+import 'package:live_wallpaper/blocs/recent_videos/recent_videos_event.dart';
+import 'package:live_wallpaper/blocs/recent_videos/recent_videos_state.dart';
 
 class VideoListPage extends StatefulWidget {
   const VideoListPage({super.key});
@@ -19,28 +22,26 @@ class VideoListPage extends StatefulWidget {
 class _VideoListPageState extends State<VideoListPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  Category? _selectedCategory;
-  List<String> _recentVideos = [];
-  bool _isLoading = false;
+  List<String> _sillySmileVideos = [];
+  List<String> _newVideos = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _selectedCategory =
-        categories.firstWhere((cat) => cat.name == 'Silly Smile');
-    _loadRecentVideos();
+    _loadCategoryData();
+    context.read<RecentVideosBloc>().add(LoadRecentVideos());
   }
 
-  Future<void> _loadRecentVideos() async {
-    setState(() => _isLoading = true);
-    final recentVideos = await RecentVideoService.getRecentVideos();
-    if (mounted) {
-      setState(() {
-        _recentVideos = recentVideos.map((v) => v.assetPath).toList();
-        _isLoading = false;
-      });
-    }
+  void _loadCategoryData() {
+    // Load Silly Smile videos
+    final sillySmileCategory =
+        categories.firstWhere((cat) => cat.name == 'Silly Smile');
+    _sillySmileVideos = sillySmileCategory.videoAssets;
+
+    // Load New videos
+    final newCategory = categories.firstWhere((cat) => cat.name == 'New');
+    _newVideos = newCategory.videoAssets;
   }
 
   @override
@@ -82,20 +83,6 @@ class _VideoListPageState extends State<VideoListPage>
                   Tab(text: 'New'),
                   Tab(text: 'Recent'),
                 ],
-                onTap: (index) {
-                  setState(() {
-                    if (index == 0) {
-                      _selectedCategory = categories
-                          .firstWhere((cat) => cat.name == 'Silly Smile');
-                    } else if (index == 1) {
-                      _selectedCategory =
-                          categories.firstWhere((cat) => cat.name == 'New');
-                    }
-                  });
-                  if (index == 2) {
-                    _loadRecentVideos();
-                  }
-                },
               ),
             ),
             const SizedBox(height: 16),
@@ -103,11 +90,20 @@ class _VideoListPageState extends State<VideoListPage>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildVideoGrid(_selectedCategory?.videoAssets ?? []),
-                  _buildVideoGrid(_selectedCategory?.videoAssets ?? []),
-                  _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : _buildVideoGrid(_recentVideos),
+                  _buildVideoGrid(_sillySmileVideos),
+                  _buildVideoGrid(_newVideos),
+                  BlocBuilder<RecentVideosBloc, RecentVideosState>(
+                    builder: (context, state) {
+                      if (state is RecentVideosLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (state is RecentVideosLoaded) {
+                        return _buildVideoGrid(state.videos);
+                      } else if (state is RecentVideosError) {
+                        return Center(child: Text(state.message));
+                      }
+                      return const Center(child: Text('No recent videos'));
+                    },
+                  ),
                 ],
               ),
             ),
@@ -385,7 +381,8 @@ class _ViewWallpaperState extends State<ViewWallpaper> {
         );
       }
 
-      await RecentVideoService.addRecentVideo(widget.assetPath);
+      // Update recent videos using BLoC
+      context.read<RecentVideosBloc>().add(AddRecentVideo(widget.assetPath));
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
